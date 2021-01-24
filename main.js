@@ -19,9 +19,13 @@ async function fetchData() {
     fetch("https://covid-19-greece.herokuapp.com/total-tests"),
   ])
 
-  const dataCases = await resAll.json()
-  const dataIntensiveCare = await resIntensiveCare.json()
-  const dataTests = await resTotalTests.json()
+  let dataCases = (await resAll.json()).cases
+  let dataIntensiveCare = (await resIntensiveCare.json()).cases
+  let dataTests = (await resTotalTests.json()).total_tests
+
+  dataCases = _.intersectionWith(dataCases, dataIntensiveCare, dataTests, (a, b) => a.date == b.date)
+  dataIntensiveCare = _.intersectionWith(dataIntensiveCare, dataCases, dataTests, (a, b) => a.date == b.date)
+  dataTests = _.intersectionWith(dataTests, dataCases, dataIntensiveCare, (a, b) => a.date == b.date)
 
   return {
     dataCases,
@@ -33,15 +37,14 @@ async function fetchData() {
 fetchData().then(({ dataCases, dataIntensiveCare, dataTests }) => {
   const fmtDate = uPlot.fmtDate("{YYYY}-{MM}-{DD}")
   const tzDate = ts => uPlot.tzDate(new Date(ts * 1e3), "Etc/UTC")
+  const dates = dataCases.map(d => new Date(d.date).getTime() / 1000)
   const plots = []
 
-  let seriesX
-  let seriesY
+  let series
   let opts
 
   // cumulative cases
-  seriesX = dataCases.cases.map(d => new Date(d.date).getTime() / 1000)
-  seriesY = dataCases.cases.map(d => d.confirmed)
+  series = [dataCases.map(d => d.confirmed)]
   opts = {
     ...calcSize(),
     series: [
@@ -57,10 +60,10 @@ fetchData().then(({ dataCases, dataIntensiveCare, dataTests }) => {
       },
     ],
   }
-  plots.push(new uPlot(opts, [seriesX, seriesY], document.getElementById("cumulative-cases")))
+  plots.push(new uPlot(opts, [dates, ...series], document.getElementById("cumulative-cases")))
 
   // cumulative deaths
-  seriesY = dataCases.cases.map(d => d.deaths)
+  series = [dataCases.map(d => d.deaths)]
   opts = {
     ...calcSize(),
     series: [
@@ -76,11 +79,10 @@ fetchData().then(({ dataCases, dataIntensiveCare, dataTests }) => {
       },
     ],
   }
-  plots.push(new uPlot(opts, [seriesX, seriesY], document.getElementById("cumulative-deaths")))
+  plots.push(new uPlot(opts, [dates, ...series], document.getElementById("cumulative-deaths")))
 
   // current patients in ICU
-  seriesX = dataIntensiveCare.cases.map(d => new Date(d.date).getTime() / 1000)
-  seriesY = dataIntensiveCare.cases.map(d => d.intensive_care)
+  series = [dataIntensiveCare.map(d => d.intensive_care)]
   opts = {
     ...calcSize(),
     series: [
@@ -96,17 +98,16 @@ fetchData().then(({ dataCases, dataIntensiveCare, dataTests }) => {
       },
     ],
   }
-  plots.push(new uPlot(opts, [seriesX, seriesY], document.getElementById("current-icu")))
+  plots.push(new uPlot(opts, [dates, ...series], document.getElementById("current-icu")))
 
   // tests
-  seriesX = dataTests.total_tests.map(d => new Date(d.date).getTime() / 1000).slice(1)
-  seriesY = [
-    dataTests.total_tests.slice(1).map((d, i) => {
-      const delta = d["rapid-tests"] - dataTests.total_tests[i]["rapid-tests"]
+  series = [
+    dataTests.slice(1).map((d, i) => {
+      const delta = d["rapid-tests"] - dataTests[i]["rapid-tests"]
       return delta < 0 ? 0 : delta
     }),
-    dataTests.total_tests.slice(1).map((d, i) => {
-      const delta = d["tests"] - dataTests.total_tests[i]["tests"]
+    dataTests.slice(1).map((d, i) => {
+      const delta = d["tests"] - dataTests[i]["tests"]
       return delta < 0 ? 0 : delta
     }),
   ]
@@ -131,7 +132,7 @@ fetchData().then(({ dataCases, dataIntensiveCare, dataTests }) => {
       },
     ],
   }
-  plots.push(new uPlot(opts, [seriesX, ...seriesY], document.getElementById("daily-tests")))
+  plots.push(new uPlot(opts, [dates, ...series], document.getElementById("daily-tests")))
 
   // add resize listeners for all plots
   plots.forEach(u =>
