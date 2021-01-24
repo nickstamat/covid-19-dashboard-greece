@@ -13,21 +13,22 @@
 
 <body>
   <div class="container mx-auto text-center">
-
-    <h1 class="p-16	text-xl font-bold margin-">COVID-19 in Greece</h1>
-
-    <div class="grid grid-cols-1 gap-y-8">
-      <div class="flex justify-center" id="cumulative-cases"></div>
-      <div class="flex justify-center" id="cumulative-deaths"></div>
-      <div class="flex justify-center" id="current-icu"></div>
-      <div class="flex justify-center" id="total-tests"></div>
-      <div class="flex justify-center" id="tests-per-day"></div>
-    </div>
-
-    <p class="p-16"><a href="https://github.com/Covid-19-Response-Greece/covid19-greece-api" target="_blank" rel="noopener noreferrer">Data source</a></p>
-
+    <h1 class="p-16	text-xl font-bold">COVID-19 in Greece</h1>
   </div>
 
+  <div class="grid grid-cols-1 gap-y-8">
+    <div class="flex justify-center" id="cumulative-cases"></div>
+    <div class="flex justify-center" id="cumulative-deaths"></div>
+    <div class="flex justify-center" id="current-icu"></div>
+    <div class="flex justify-center" id="daily-tests"></div>
+  </div>
+
+  <div id="container" class="container mx-auto text-center">
+    <p class="p-16"><a href="https://github.com/Covid-19-Response-Greece/covid19-greece-api" target="_blank"
+        rel="noopener noreferrer">Data source</a></p>
+  </div>
+
+  <script src="https://unpkg.com/lodash@4.17.20/lodash.min.js"></script>
   <script src="https://unpkg.com/uplot@1.6.3/dist/uPlot.iife.min.js"></script>
   <script src="main.js"></script>
 </body>
