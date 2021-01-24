@@ -23,9 +23,24 @@ async function fetchData() {
   let dataIntensiveCare = (await resIntensiveCare.json()).cases
   let dataTests = (await resTotalTests.json()).total_tests
 
-  dataCases = _.intersectionWith(dataCases, dataIntensiveCare, dataTests, (a, b) => a.date == b.date)
-  dataIntensiveCare = _.intersectionWith(dataIntensiveCare, dataCases, dataTests, (a, b) => a.date == b.date)
-  dataTests = _.intersectionWith(dataTests, dataCases, dataIntensiveCare, (a, b) => a.date == b.date)
+  dataCases = _.intersectionWith(
+    dataCases,
+    dataIntensiveCare,
+    dataTests,
+    (a, b) => a.date == b.date
+  )
+  dataIntensiveCare = _.intersectionWith(
+    dataIntensiveCare,
+    dataCases,
+    dataTests,
+    (a, b) => a.date == b.date
+  )
+  dataTests = _.intersectionWith(
+    dataTests,
+    dataCases,
+    dataIntensiveCare,
+    (a, b) => a.date == b.date
+  )
 
   return {
     dataCases,
@@ -35,6 +50,9 @@ async function fetchData() {
 }
 
 fetchData().then(({ dataCases, dataIntensiveCare, dataTests }) => {
+  // hide loader
+  document.getElementById("loader").style.display = "none"
+
   const fmtDate = uPlot.fmtDate("{YYYY}-{MM}-{DD}")
   const tzDate = ts => uPlot.tzDate(new Date(ts * 1e3), "Etc/UTC")
   const dates = dataCases.map(d => new Date(d.date).getTime() / 1000)
