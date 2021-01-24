@@ -1,5 +1,5 @@
 function calcSize() {
-  const width = window.innerWidth - 200
+  const width = window.innerWidth * 0.8
   let height = width * 0.75
 
   if (height > window.innerHeight - 300) {
