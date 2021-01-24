@@ -1,4 +1,4 @@
 [[headers]]
   for = "/*"
     [headers.values]
-    Content-Security-Policy = "default-src 'none'; script-src 'self' https://unpkg.com; style-src 'unsafe-inline' https://unpkg.com; connect-src https://covid-19-greece.herokuapp.com"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' https://unpkg.com; style-src 'unsafe-inline' https://unpkg.com; connect-src https://covid-19-greece.herokuapp.com"
